@@ -1,0 +1,73 @@
+package ru.ergakov.gb.aspects;
+
+import java.io.IOException;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.SimpleFormatter;
+
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.Aspect;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.logging.Logger;
+
+@Aspect
+@Component
+public class MyLoggingAspect {
+    private final Logger logger = Logger.getLogger(MyLoggingAspect.class.getName());
+
+    public MyLoggingAspect() {
+        try {
+            FileHandler fileHandler = new FileHandler("myApp.log", true);
+            SimpleFormatter formatter = new SimpleFormatter();
+            fileHandler.setFormatter(formatter);
+
+            logger.addHandler(fileHandler);
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error occur in FileHandler.", e);
+        }
+    }
+
+    /**
+     * Метод логирования
+     * @param joinPoint точка соединения
+     * @param returnedValue возвращаемый объект
+     */
+    @AfterReturning(value = "@annotation(TrackUserAction))", returning = "returnedValue")
+    public void log(JoinPoint joinPoint, Object returnedValue) {
+        // Информация о методе
+        String methodName = joinPoint.getSignature().getName();
+        String className = joinPoint.getTarget().getClass().toString();
+        Object[] methodArgs = joinPoint.getArgs();
+
+
+        // Вывод информации в лог
+        logger.info("Информация логирования: ");
+        logger.info("Пользователь: " + getGreetings());
+        logger.info("Вызванный метод: " + methodName);
+        logger.info("Класс: " + className);
+        logger.info("Аргументы: " + Arrays.toString(methodArgs));
+        logger.info("Метод отработал и вернул значение: " + returnedValue);
+        logger.info("Конец блока логирования. \n");
+    }
+
+    /**
+     * Метод получения имени пользователя
+     * @return Имя пользователя
+     */
+    String getGreetings() {
+        try {
+            SecurityContextHolderStrategy strategy = SecurityContextHolder.getContextHolderStrategy();
+            var userDetails = (UserDetails) strategy.getContext()
+                    .getAuthentication().getPrincipal();
+            return userDetails.getUsername();
+        } catch (Exception ex){
+            return "не авторизован";
+        }
+    }
+}
