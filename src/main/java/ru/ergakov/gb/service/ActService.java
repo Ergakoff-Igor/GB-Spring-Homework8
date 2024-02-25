@@ -2,6 +2,7 @@ package ru.ergakov.gb.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ergakov.gb.aspects.TrackUserAction;
 import ru.ergakov.gb.model.Act;
 import ru.ergakov.gb.repositories.ActRepository;
@@ -19,6 +20,7 @@ public class ActService {
      * @return список актов
      */
     @TrackUserAction
+    @Transactional
     public List<Act> findAll(){
         return actRepository.findAll();
     }
@@ -30,6 +32,7 @@ public class ActService {
      * @return слхраненный акт
      */
     @TrackUserAction
+    @Transactional
     public Act saveAct(Act act){
         return actRepository.save(act);
     }
@@ -40,6 +43,7 @@ public class ActService {
      * @param id id акта
      */
     @TrackUserAction
+    @Transactional
     public void deleteById(int id){
         actRepository.deleteById(id);
     }
@@ -51,6 +55,7 @@ public class ActService {
      * @return акт
      */
     @TrackUserAction
+    @Transactional
     public Act getOneActByID(int id)  {
        return actRepository.getOne(id);
     }
@@ -62,6 +67,7 @@ public class ActService {
      * @return измененный акт
      */
     @TrackUserAction
+    @Transactional
     public Act updateAct(Act act){
         return actRepository.updateAct(act);
     }
